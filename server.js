@@ -31,15 +31,6 @@ function jsonError(res, message) {
   res.json({ status: 'error', message });
 }
 
-async function read_File(filename, res) {
-  try {
-    const text = await readFile(path.join(DATA_DIR, filename), 'utf8');
-    jsonOK(res, { body: text });
-  } catch (err) {
-    jsonError(res, 'Page does not exist.');
-  }
-}
-
 // If you want to see the wiki client, run npm install && npm build in the client folder,
 // statically serve /client/build
 
@@ -47,14 +38,26 @@ async function read_File(filename, res) {
 // success response: {status: 'ok', body: '<file contents>'}
 // failure response: {status: 'error', message: 'Page does not exist.'}
 app.get('/api/page/:slug', async (req, res) => {
-  const filename = req.params.slug + '.md';
-  read_File(filename, res);
+  try {
+    const text = await readFile(slugToPath(req.params.slug), 'utf8');
+    jsonOK(res, { body: text });
+  } catch (err) {
+    jsonError(res, 'Page does not exist.');
+  }
 });
 
 // POST: '/api/page/:slug'
 // body: {body: '<file text content>'}
 // success response: {status: 'ok'}
 // failure response: {status: 'error', message: 'Could not write page.'}
+app.post('/api/page/:slug', async (req, res) => {
+  try {
+    await writeFile(slugToPath(req.params.slug), req.body.body, 'utf8');
+    jsonOK(res, {});
+  } catch (err) {
+    jsonError(res, 'Could not write page.');
+  }
+});
 
 // GET: '/api/pages/all'
 // success response: {status:'ok', pages: ['fileName', 'otherFileName']}
