@@ -22,3 +22,11 @@
 - User must be able to fetch information from the server using REST  API commands, the server must process the request and give back a response with the filename given as parameter and the contents of the file in JSON given as the body with status "ok" or status "error" and a message.
 - The file `server.js` add the functionality to process incoming POST requests to `/api/page/:slug`.
 - Async/await functionality to process the asynchronous write file callbacks.
+
+---
+
+## 3. User Story: `GET request, retrieve file list from data folder`
+
+- User must be able to fetch information from the server using REST  API commands, the server must process the request and give back a response with a list of filenames with status "ok", in case of error no response is given.
+- The file `server.js` add the functionality to process incoming GET requests to `/api/pages/all`.
+- Async/await functionality to process the asynchronous readdir callbacks.

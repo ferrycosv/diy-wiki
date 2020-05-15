@@ -63,7 +63,19 @@ app.post('/api/page/:slug', async (req, res) => {
 // success response: {status:'ok', pages: ['fileName', 'otherFileName']}
 //  file names do not have .md, just the name!
 // failure response: no failure response
-
+app.get('/api/pages/all', async (req, res, next) => {
+  await fs.readdir(DATA_DIR, (err, list) => {
+    if (!list) {
+      res.status(404).end();
+      return;
+    }
+    if (err) {
+      next(err);
+      return;
+    }
+    jsonOK(res, { pages: list.map((x) => x.replace(/(\.md)$/gi, '')) });
+  });
+});
 // GET: '/api/tags/all'
 // success response: {status:'ok', tags: ['tagName', 'otherTagName']}
 //  tags are any word in all documents with a # in front of it
@@ -74,11 +86,11 @@ app.post('/api/page/:slug', async (req, res) => {
 //  file names do not have .md, just the name!
 // failure response: no failure response
 
-app.get('/api/page/all', async (req, res) => {
+/*app.get('/api/page/all', async (req, res) => {
   const names = await fs.readdir(DATA_DIR);
   console.log(names);
   jsonOK(res, {});
-});
+});*/
 
 const port = process.env.PORT || 5000;
 app.listen(port, () => console.log(`Wiki app is serving at http://localhost:${port}`));
