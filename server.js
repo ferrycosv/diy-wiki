@@ -64,7 +64,7 @@ app.post('/api/page/:slug', async (req, res) => {
 //  file names do not have .md, just the name!
 // failure response: no failure response
 app.get('/api/pages/all', async (req, res, next) => {
-  await fs.readdir(DATA_DIR, (err, list) => {
+  fs.readdir(DATA_DIR, (err, list) => {
     if (!list) {
       res.status(404).end();
       return;
@@ -81,7 +81,7 @@ app.get('/api/pages/all', async (req, res, next) => {
 //  tags are any word in all documents with a # in front of it
 // failure response: no failure response
 app.get('/api/tags/all', async (req, res, next) => {
-  await fs.readdir(DATA_DIR, (err, list) => {
+  fs.readdir(DATA_DIR, (err, list) => {
     if (!list) {
       res.status(404).end();
       return;
@@ -101,7 +101,8 @@ app.get('/api/tags/all', async (req, res, next) => {
         }
       })
     ).then((x) => {
-      jsonOK(res, { tags: [...new Set(x.flat().filter((x) => x !== null))] });
+      const tag_list = [...new Set(x.flat().filter(Boolean))];
+      jsonOK(res, { tags: tag_list.map((item) => item.replace('#', '')) });
     });
   });
 });
@@ -110,6 +111,35 @@ app.get('/api/tags/all', async (req, res, next) => {
 // success response: {status:'ok', tag: 'tagName', pages: ['tagName', 'otherTagName']}
 //  file names do not have .md, just the name!
 // failure response: no failure response
+app.get('/api/tags/:tag', async (req, res, next) => {
+  fs.readdir(DATA_DIR, (err, list) => {
+    if (!list) {
+      res.status(404).end();
+      return;
+    }
+    if (err) {
+      next(err);
+      return;
+    }
+    list = list.map((x) => x.replace(/(\.md)$/gi, ''));
+    Promise.all(
+      list.map(async (item) => {
+        try {
+          const text = await readFile(slugToPath(item), 'utf8');
+          const regexp = RegExp('#' + req.params.tag, 'gi');
+          if (regexp.test(text)) return item;
+        } catch (err) {
+          return err;
+        }
+      })
+    ).then((x) => {
+      jsonOK(res, {
+        tag: req.params.tag,
+        pages: [...new Set(x.flat().filter(Boolean))],
+      });
+    });
+  });
+});
 
 /*app.get('/api/page/all', async (req, res) => {
   const names = await fs.readdir(DATA_DIR);

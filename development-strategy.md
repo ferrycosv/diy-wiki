@@ -33,8 +33,16 @@
 
 ---
 
-## 4. User Story: `GET request, retrieve list all tags used`
+## 4. User Story: `GET request, retrieve list of all tags used`
 
 - User must be able to fetch information from the server using REST  API commands, the server must process the request and give back a response with a list of tags used in all files with status "ok", in case of error no response is given.
 - The file `server.js` add the functionality to process incoming GET requests to `/api/tags/all`.
+- Async/await functionality to process the asynchronous readdir and fileread callbacks.
+
+---
+
+## 5. User Story: `GET request, retrieve list of pages a tag used`
+
+- User must be able to fetch information from the server using REST  API commands, the server must process the request and give back a response with a list of pages a tag is used with status "ok", in case of error no response is given.
+- The file `server.js` add the functionality to process incoming GET requests to `/api/tags/:tag`.
 - Async/await functionality to process the asynchronous readdir and fileread callbacks.
