@@ -80,6 +80,31 @@ app.get('/api/pages/all', async (req, res, next) => {
 // success response: {status:'ok', tags: ['tagName', 'otherTagName']}
 //  tags are any word in all documents with a # in front of it
 // failure response: no failure response
+app.get('/api/tags/all', async (req, res, next) => {
+  await fs.readdir(DATA_DIR, (err, list) => {
+    if (!list) {
+      res.status(404).end();
+      return;
+    }
+    if (err) {
+      next(err);
+      return;
+    }
+    list = list.map((x) => x.replace(/(\.md)$/gi, ''));
+    Promise.all(
+      list.map(async (item) => {
+        try {
+          const text = await readFile(slugToPath(item), 'utf8');
+          return text.match(TAG_RE);
+        } catch (err) {
+          return err;
+        }
+      })
+    ).then((x) => {
+      jsonOK(res, { tags: [...new Set(x.flat().filter((x) => x !== null))] });
+    });
+  });
+});
 
 // GET: '/api/tags/:tag'
 // success response: {status:'ok', tag: 'tagName', pages: ['tagName', 'otherTagName']}
